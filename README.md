@@ -4,9 +4,9 @@ Free RESTful API for anime streaming data. Powered by AniList GraphQL and Miruro
 
 ## Live
 
-- **API**: `https://miruroapi-zeta.vercel.app`
-- **Docs**: `https://miruroapi-zeta.vercel.app/docs` (Swagger UI)
-- **OpenAPI**: `https://miruroapi-zeta.vercel.app/openapi.json`
+- **API**: `https://mirurotvapi.vercel.app`
+- **Docs**: `https://mirurotvapi.vercel.app/docs` (Swagger UI)
+- **OpenAPI**: `https://mirurotvapi.vercel.app/openapi.json`
 - **GitHub**: `https://github.com/Shineii86/MiruroAPI`
 
 ## Features

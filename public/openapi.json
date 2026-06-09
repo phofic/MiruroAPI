@@ -14,7 +14,7 @@
   },
   "servers": [
     {
-      "url": "https://miruroapi-zeta.vercel.app",
+      "url": "https://mirurotvapi.vercel.app",
       "description": "Production"
     }
   ],
