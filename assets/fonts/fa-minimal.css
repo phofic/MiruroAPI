@@ -1,0 +1,25 @@
+/*!
+ * Font Awesome Free 6.4.0 - Minimal subset for miruro hub
+ * License: https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+ */
+@font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;font-display:block;src:url(fa-solid-900.woff2) format("woff2")}
+@font-face{font-family:"Font Awesome 6 Brands";font-style:normal;font-weight:400;font-display:block;src:url(fa-brands-400.woff2) format("woff2")}
+.fa,.fab,.fas{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;line-height:1;text-rendering:auto}
+.fas{font-family:"Font Awesome 6 Free";font-weight:900}
+.fab{font-family:"Font Awesome 6 Brands";font-weight:400}
+.fa-arrow-right:before{content:"\f08b"}
+.fa-arrow-up:before{content:"\f176"}
+.fa-bars:before{content:"\f0c9"}
+.fa-chart-bar:before{content:"\f080"}
+.fa-check-circle:before{content:"\f058"}
+.fa-globe:before{content:"\f57c"}
+.fa-language:before{content:"\f1ab"}
+.fa-play-circle:before{content:"\f144"}
+.fa-server:before{content:"\f233"}
+.fa-shield-alt:before{content:"\f3ed"}
+.fa-star:before{content:"\f699"}
+.fa-times:before{content:"\f00d"}
+.fa-users:before{content:"\e594"}
+.fa-discord:before{content:"\f392"}
+.fa-reddit:before{content:"\f1a2"}
+.fa-twitter:before{content:"\f081"}
