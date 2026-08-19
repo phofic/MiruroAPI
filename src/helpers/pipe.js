@@ -104,7 +104,7 @@ const decodePipeResponse = (encodedStr, obfHeader = null) => {
 // ══════════════════════════════════════════════════════════════
 
 const methodDirect = async (encodedReq) => {
-  const maxRetries = 4;
+  const maxRetries = 3;
   let lastError;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -113,7 +113,7 @@ const methodDirect = async (encodedReq) => {
     try {
       const res = await axios.get(`${origin}${PIPE_PATH}?e=${encodedReq}`, {
         headers: HEADERS,
-        timeout: 20000,
+        timeout: 10000,
         maxRedirects: 5,
       });
 
@@ -206,15 +206,70 @@ const methodFlareSolverr = async (encodedReq) => {
 };
 
 // ══════════════════════════════════════════════════════════════
+// METHOD 4: CORSPROXY.IO (free CORS proxy, bypasses basic CF checks)
+// ══════════════════════════════════════════════════════════════
+
+const methodCorsProxy = async (encodedReq) => {
+  const targetUrl = `${CANONICAL_ORIGIN}${PIPE_PATH}?e=${encodedReq}`;
+  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+  const res = await axios.get(proxyUrl, {
+    headers: {
+      "User-Agent": HEADERS["User-Agent"],
+      "Accept": "application/json, text/plain, */*",
+    },
+    timeout: 15000,
+    maxRedirects: 5,
+  });
+
+  if (res.status !== 200)
+    throw new Error(`CorsProxy request failed: ${res.status}`);
+
+  const obf = res.headers["x-obfuscated"];
+  return { data: decodePipeResponse(res.data, obf), method: "corsproxy" };
+};
+
+// ══════════════════════════════════════════════════════════════
+// METHOD 5: PROXYFY-STREAMS CF-PROXY (tls_client Chrome fingerprint)
+// ══════════════════════════════════════════════════════════════
+
+const PROXYFY_URL = (process.env.PROXYFY_URL || "https://proxify-streams-theta.vercel.app").replace(/\/+$/, "");
+
+const methodProxifyCF = async (encodedReq) => {
+  const targetUrl = `${CANONICAL_ORIGIN}${PIPE_PATH}?e=${encodedReq}`;
+  const proxyUrl = `${PROXYFY_URL}/cf-proxy?url=${encodeURIComponent(targetUrl)}&referer=${encodeURIComponent(CANONICAL_ORIGIN + "/")}&type=json`;
+
+  const res = await axios.get(proxyUrl, {
+    headers: { "User-Agent": HEADERS["User-Agent"] },
+    timeout: 20000,
+    maxRedirects: 5,
+  });
+
+  if (res.status !== 200)
+    throw new Error(`Proxify CF-Proxy request failed: ${res.status}`);
+
+  // The CF proxy returns the decoded body text — parse it as pipe response
+  const body = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+  return { data: decodePipeResponse(body, null), method: "proxify-cf" };
+};
+
+// ══════════════════════════════════════════════════════════════
 // SELF-HEALING PIPE REQUEST (tries all methods in order)
 // ══════════════════════════════════════════════════════════════
 
 const METHODS = [
   { name: "direct", fn: methodDirect },
+  { name: "corsproxy", fn: methodCorsProxy },
+  { name: "proxify-cf", fn: methodProxifyCF },
   { name: "scraperapi", fn: methodScraperAPI, requires: () => !!SCRAPER_API_KEY },
   { name: "flaresolverr", fn: methodFlareSolverr, requires: () => !!FLARESOLVERR_URL },
 ];
 
+/**
+ * Self-healing pipe request — tries all enabled methods sequentially.
+ * Returns as soon as ANY method succeeds.
+ * Total worst case: ~45s (10s direct + 15s corsproxy + 20s proxify-cf).
+ */
 const pipeRequest = async (path, query) => {
   const payload = { path, method: "GET", query, body: null };
   const encodedReq = encodePipeRequest(payload);
